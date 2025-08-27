@@ -45,5 +45,5 @@ service:
   tags:
     frontend: ""
     nextjs: ""
-  projectIdentifier: MowerFrontend
+  projectIdentifier: Mower
   orgIdentifier: stf
