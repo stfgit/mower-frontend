@@ -18,8 +18,8 @@ pipeline:
               infrastructure:
                 type: KubernetesDirect
                 spec:
-                  connectorRef: <+input>
-                  namespace: <+input>.default(harness-ci)
+                  connectorRef: account.k8sdocacloud
+                  namespace: harness-ci
               execution:
                 steps:
                   - parallel:
@@ -28,7 +28,7 @@ pipeline:
                           type: Owasp
                           spec:
                             advanced:
-                              fail_on_severity: <+input>
+                              fail_on_severity: none
                             resources:
                               limits:
                                 memory: <+input>.default(2Gi)
@@ -38,21 +38,21 @@ pipeline:
                           type: AquaTrivy
                           spec:
                             advanced:
-                              fail_on_severity: <+input>
+                              fail_on_severity: none
                             resources:
                               limits:
-                                memory: <+input>
-                                cpu: <+input>
+                                memory: ""
+                                cpu: ""
                       - step:
                           identifier: gitleaks
                           type: Gitleaks
                           spec:
                             advanced:
-                              fail_on_severity: <+input>
+                              fail_on_severity: low
                             resources:
                               limits:
-                                memory: <+input>
-                                cpu: <+input>
+                                memory: ""
+                                cpu: ""
             delegateSelectors: <+input>
     - stage:
         name: npm build and push
@@ -66,20 +66,20 @@ pipeline:
               infrastructure:
                 type: KubernetesDirect
                 spec:
-                  connectorRef: <+input>
-                  namespace: <+input>.default(harness-ci)
+                  connectorRef: account.k8sdocacloud
+                  namespace: harness-ci
               execution:
                 steps:
                   - step:
                       identifier: Workspace_Validation
                       type: Run
                       spec:
-                        connectorRef: <+input>
-                        image: <+input>.default(node:20)
+                        connectorRef: org.Dockerhub
+                        image: node:20
                         resources:
                           limits:
-                            memory: <+input>.default(512Mi)
-                            cpu: <+input>.default(500m)
+                            memory: ""
+                            cpu: ""
                           requests:
                             memory: <+input>.default(256Mi)
                             cpu: <+input>.default(250m)
@@ -87,8 +87,8 @@ pipeline:
                       identifier: Install_Dependencies
                       type: Run
                       spec:
-                        connectorRef: <+input>
-                        image: <+input>.default(node:20)
+                        connectorRef: org.Dockerhub
+                        image: node:20
                         resources:
                           limits:
                             memory: <+input>.default(2Gi)
@@ -100,8 +100,8 @@ pipeline:
                       identifier: Code_Quality_Check
                       type: Run
                       spec:
-                        connectorRef: <+input>
-                        image: <+input>.default(node:20)
+                        connectorRef: org.Dockerhub
+                        image: node:20
                         resources:
                           limits:
                             memory: <+input>.default(1Gi)
@@ -115,8 +115,8 @@ pipeline:
                       identifier: Build_Application
                       type: Run
                       spec:
-                        connectorRef: <+input>
-                        image: <+input>.default(node:20)
+                        connectorRef: org.Dockerhub
+                        image: node:20
                         resources:
                           limits:
                             memory: <+input>.default(4Gi)
@@ -128,8 +128,8 @@ pipeline:
                       identifier: Run_Tests
                       type: Run
                       spec:
-                        connectorRef: <+input>
-                        image: <+input>.default(node:20)
+                        connectorRef: org.Dockerhub
+                        image: node:20
                         resources:
                           limits:
                             memory: <+input>.default(2Gi)
@@ -143,8 +143,8 @@ pipeline:
                       identifier: Security_Audit
                       type: Run
                       spec:
-                        connectorRef: <+input>
-                        image: <+input>.default(node:20)
+                        connectorRef: org.Dockerhub
+                        image: node:20
                         resources:
                           limits:
                             memory: <+input>.default(1Gi)
@@ -155,8 +155,8 @@ pipeline:
                       identifier: BuildAndPushDockerRegistry_1
                       type: BuildAndPushDockerRegistry
                       spec:
-                        connectorRef: <+input>
-                        repo: <+input>
+                        connectorRef: org.Dockerhub
+                        repo: stfgit/mower-frontend
                         dockerfile: <+input>.default(Dockerfile)
                         context: <+input>.default(.)
                         buildArgs:
