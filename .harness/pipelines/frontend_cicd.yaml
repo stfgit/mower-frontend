@@ -74,12 +74,12 @@ pipeline:
                       identifier: Workspace_Validation
                       type: Run
                       spec:
-                        connectorRef: org.Dockerhub
-                        image: node:20
+                        connectorRef: <+input>
+                        image: <+input>.default(node:20)
                         resources:
                           limits:
-                            memory: ""
-                            cpu: ""
+                            memory: <+input>.default(512Mi)
+                            cpu: <+input>.default(500m)
                           requests:
                             memory: <+input>.default(256Mi)
                             cpu: <+input>.default(250m)
@@ -87,8 +87,8 @@ pipeline:
                       identifier: Install_Dependencies
                       type: Run
                       spec:
-                        connectorRef: org.Dockerhub
-                        image: node:20
+                        connectorRef: <+input>
+                        image: <+input>.default(node:20)
                         resources:
                           limits:
                             memory: <+input>.default(2Gi)
@@ -100,8 +100,8 @@ pipeline:
                       identifier: Code_Quality_Check
                       type: Run
                       spec:
-                        connectorRef: org.Dockerhub
-                        image: node:20
+                        connectorRef: <+input>
+                        image: <+input>.default(node:20)
                         resources:
                           limits:
                             memory: <+input>.default(1Gi)
@@ -115,8 +115,8 @@ pipeline:
                       identifier: Build_Application
                       type: Run
                       spec:
-                        connectorRef: org.Dockerhub
-                        image: node:20
+                        connectorRef: <+input>
+                        image: <+input>.default(node:20)
                         resources:
                           limits:
                             memory: <+input>.default(4Gi)
@@ -128,8 +128,8 @@ pipeline:
                       identifier: Run_Tests
                       type: Run
                       spec:
-                        connectorRef: org.Dockerhub
-                        image: node:20
+                        connectorRef: <+input>
+                        image: <+input>.default(node:20)
                         resources:
                           limits:
                             memory: <+input>.default(2Gi)
@@ -143,8 +143,8 @@ pipeline:
                       identifier: Security_Audit
                       type: Run
                       spec:
-                        connectorRef: org.Dockerhub
-                        image: node:20
+                        connectorRef: <+input>
+                        image: <+input>.default(node:20)
                         resources:
                           limits:
                             memory: <+input>.default(1Gi)
@@ -155,8 +155,8 @@ pipeline:
                       identifier: BuildAndPushDockerRegistry_1
                       type: BuildAndPushDockerRegistry
                       spec:
-                        connectorRef: org.Dockerhub
-                        repo: stfgit/mower-frontend
+                        connectorRef: <+input>
+                        repo: <+input>
                         dockerfile: <+input>.default(Dockerfile)
                         context: <+input>.default(.)
                         buildArgs:
