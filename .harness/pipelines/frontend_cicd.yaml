@@ -236,5 +236,5 @@ pipeline:
     frontend: ""
     nextjs: ""
     react: ""
-  projectIdentifier: MowerFrontend
+  projectIdentifier: Mower
   orgIdentifier: stf
