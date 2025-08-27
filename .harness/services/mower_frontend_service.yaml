@@ -6,7 +6,7 @@ service:
     spec:
       manifests:
         - manifest:
-            identifier: frontend-deployment
+            identifier: frontendManifests
             type: K8sManifest
             spec:
               store:
@@ -14,14 +14,6 @@ service:
                 spec:
                   files:
                     - /manifests/frontend-deployment.yaml
-        - manifest:
-            identifier: frontend-service
-            type: K8sManifest
-            spec:
-              store:
-                type: Harness
-                spec:
-                  files:
                     - /manifests/frontend-service.yaml
         - manifest:
             identifier: values
