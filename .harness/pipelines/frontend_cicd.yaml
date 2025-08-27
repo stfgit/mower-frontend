@@ -34,6 +34,16 @@ pipeline:
                                 memory: <+input>.default(2Gi)
                                 cpu: <+input>.default(500m)
                       - step:
+                          identifier: aquatrivy
+                          type: AquaTrivy
+                          spec:
+                            advanced:
+                              fail_on_severity: <+input>
+                            resources:
+                              limits:
+                                memory: <+input>
+                                cpu: <+input>
+                      - step:
                           identifier: gitleaks
                           type: Gitleaks
                           spec:
@@ -70,6 +80,9 @@ pipeline:
                           limits:
                             memory: <+input>.default(512Mi)
                             cpu: <+input>.default(500m)
+                          requests:
+                            memory: <+input>.default(256Mi)
+                            cpu: <+input>.default(250m)
                   - step:
                       identifier: Install_Dependencies
                       type: Run
@@ -80,6 +93,9 @@ pipeline:
                           limits:
                             memory: <+input>.default(2Gi)
                             cpu: <+input>.default(1000m)
+                          requests:
+                            memory: <+input>.default(1Gi)
+                            cpu: <+input>.default(500m)
                   - step:
                       identifier: Code_Quality_Check
                       type: Run
@@ -90,6 +106,11 @@ pipeline:
                           limits:
                             memory: <+input>.default(1Gi)
                             cpu: <+input>.default(500m)
+                          requests:
+                            memory: <+input>.default(512Mi)
+                            cpu: <+input>.default(250m)
+                      when:
+                        condition: <+input>.default("true")
                   - step:
                       identifier: Build_Application
                       type: Run
@@ -100,6 +121,9 @@ pipeline:
                           limits:
                             memory: <+input>.default(4Gi)
                             cpu: <+input>.default(2000m)
+                          requests:
+                            memory: <+input>.default(2Gi)
+                            cpu: <+input>.default(1000m)
                   - step:
                       identifier: Run_Tests
                       type: Run
@@ -110,6 +134,11 @@ pipeline:
                           limits:
                             memory: <+input>.default(2Gi)
                             cpu: <+input>.default(1000m)
+                          requests:
+                            memory: <+input>.default(1Gi)
+                            cpu: <+input>.default(500m)
+                      when:
+                        condition: <+input>.default("true")
                   - step:
                       identifier: Security_Audit
                       type: Run
@@ -120,6 +149,8 @@ pipeline:
                           limits:
                             memory: <+input>.default(1Gi)
                             cpu: <+input>.default(500m)
+                      when:
+                        condition: <+input>.default("true")
                   - step:
                       identifier: BuildAndPushDockerRegistry_1
                       type: BuildAndPushDockerRegistry
@@ -128,11 +159,15 @@ pipeline:
                         repo: <+input>
                         dockerfile: <+input>.default(Dockerfile)
                         context: <+input>.default(.)
-                        tags: <+input>
+                        buildArgs:
+                          WORKING_DIR: <+input>.default(.)
                         resources:
                           limits:
                             memory: <+input>.default(4Gi)
                             cpu: <+input>.default(1500m)
+                          requests:
+                            memory: <+input>.default(2Gi)
+                            cpu: <+input>.default(1000m)
               variables:
                 - name: WORKING_DIRECTORY
                   type: String
@@ -140,7 +175,9 @@ pipeline:
                 - name: NODE_VERSION
                   type: String
                   value: <+input>.default(20)
-            delegateSelectors: <+input>
+                - name: BUILD_MODE
+                  type: String
+                  value: <+input>.default(production)
     - stage:
         name: scan images
         identifier: scan_images
@@ -189,8 +226,11 @@ pipeline:
                     spec:
                       artifacts:
                         primary:
-                          primaryArtifactRef: <+input>
-                          sources: <+input>
+                          sources:
+                            - identifier: frontendImage
+                              type: DockerRegistry
+                              spec:
+                                tag: <+input>
             delegateSelectors:
               - helm-delegate
     - stage:
@@ -223,8 +263,6 @@ pipeline:
             spec:
               environment:
                 environmentRef: prod
-                infrastructureDefinitions:
-                  - identifier: mower_frontend_infra
               service:
                 useFromStage:
                   stage: deploy_dev
