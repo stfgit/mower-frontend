@@ -263,6 +263,7 @@ pipeline:
             spec:
               environment:
                 environmentRef: prod
+                infrastructureDefinitions: <+input>
               service:
                 useFromStage:
                   stage: deploy_dev
