@@ -10,20 +10,19 @@ service:
             type: K8sManifest
             spec:
               store:
-                type: Harness
+                type: Github
                 spec:
-                  files:
-                    - /manifests/frontend-deployment.yaml
-                    - /manifests/frontend-service.yaml
-        - manifest:
-            identifier: values
-            type: Values
-            spec:
-              store:
-                type: Harness
-                spec:
-                  files:
-                    - /manifests/values.yaml
+                  connectorRef: account.Github
+                  gitFetchType: Branch
+                  paths:
+                    - .harness/manifests/frontend-deployment.yaml
+                    - .harness/manifests/frontend-service.yaml
+                  repoName: stfgit/mower-frontend
+                  branch: main
+              valuesPaths:
+                - .harness/manifests/values.yaml
+              skipResourceVersioning: false
+              enableDeclarativeRollback: false
       artifacts:
         primary:
           primaryArtifactRef: frontendImage
