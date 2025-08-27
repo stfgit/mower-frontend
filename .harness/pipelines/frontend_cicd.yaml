@@ -230,7 +230,7 @@ pipeline:
                   stage: deploy_dev
             delegateSelectors:
               - helm-delegate
-  name: mower-frontend - CI/CD
+  name: mower frontend
   identifier: mower_frontend_cicd
   tags:
     frontend: ""
