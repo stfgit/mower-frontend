@@ -1,0 +1,16 @@
+name: mower-frontend
+namespace: <+infra.namespace>
+replicas: 2
+
+image: <+artifacts.primary.image>
+
+nodeEnv: production
+backendApiUrl: http://mower-backend-service/api/mower
+
+resources:
+  limits:
+    memory: 512Mi
+    cpu: 500m
+  requests:
+    memory: 256Mi
+    cpu: 250m

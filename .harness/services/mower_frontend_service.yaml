@@ -1,0 +1,49 @@
+service:
+  name: mower frontend service
+  identifier: mower_frontend_service
+  serviceDefinition:
+    type: Kubernetes
+    spec:
+      manifests:
+        - manifest:
+            identifier: frontend-deployment
+            type: K8sManifest
+            spec:
+              store:
+                type: Harness
+                spec:
+                  files:
+                    - /manifests/frontend-deployment.yaml
+        - manifest:
+            identifier: frontend-service
+            type: K8sManifest
+            spec:
+              store:
+                type: Harness
+                spec:
+                  files:
+                    - /manifests/frontend-service.yaml
+        - manifest:
+            identifier: values
+            type: Values
+            spec:
+              store:
+                type: Harness
+                spec:
+                  files:
+                    - /manifests/values.yaml
+      artifacts:
+        primary:
+          primaryArtifactRef: frontendImage
+          sources:
+            - identifier: frontendImage
+              type: DockerRegistry
+              spec:
+                connectorRef: org.Dockerhub
+                imagePath: stfgit/mower-frontend
+                tag: <+input>
+  tags:
+    frontend: ""
+    nextjs: ""
+  projectIdentifier: MowerFrontend
+  orgIdentifier: stf

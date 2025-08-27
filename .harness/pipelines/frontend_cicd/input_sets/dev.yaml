@@ -1,0 +1,205 @@
+inputSet:
+  pipeline:
+    identifier: mower_frontend_cicd
+    properties:
+      ci:
+        codebase:
+          connectorRef: account.Github
+          repoName: stfgit/mower-frontend
+          build:
+            spec:
+              branch: main
+            type: branch
+    stages:
+      - stage:
+          identifier: source_code_scan
+          template:
+            templateInputs:
+              type: SecurityTests
+              spec:
+                infrastructure:
+                  type: KubernetesDirect
+                  spec:
+                    connectorRef: account.k8sdocacloud
+                    namespace: harness-ci
+                execution:
+                  steps:
+                    - parallel:
+                        - step:
+                            identifier: owasp
+                            type: Owasp
+                            spec:
+                              advanced:
+                                fail_on_severity: none
+                              resources:
+                                limits:
+                                  memory: 2Gi
+                                  cpu: 500m
+                        - step:
+                            identifier: gitleaks
+                            type: Gitleaks
+                            spec:
+                              advanced:
+                                fail_on_severity: low
+                              resources:
+                                limits:
+                                  memory: 1Gi
+                                  cpu: 500m
+              delegateSelectors:
+                - helm-delegate
+      - stage:
+          identifier: npm_build_and_push
+          template:
+            templateInputs:
+              type: CI
+              spec:
+                infrastructure:
+                  type: KubernetesDirect
+                  spec:
+                    connectorRef: account.k8sdocacloud
+                    namespace: harness-ci
+                execution:
+                  steps:
+                    - step:
+                        identifier: Workspace_Validation
+                        spec:
+                          connectorRef: org.Dockerhub
+                          image: node:20
+                          resources:
+                            limits:
+                              memory: 512Mi
+                              cpu: 500m
+                    - step:
+                        identifier: Install_Dependencies
+                        spec:
+                          connectorRef: org.Dockerhub
+                          image: node:20
+                          resources:
+                            limits:
+                              memory: 2Gi
+                              cpu: 1000m
+                    - step:
+                        identifier: Code_Quality_Check
+                        spec:
+                          connectorRef: org.Dockerhub
+                          image: node:20
+                          resources:
+                            limits:
+                              memory: 1Gi
+                              cpu: 500m
+                    - step:
+                        identifier: Build_Application
+                        spec:
+                          connectorRef: org.Dockerhub
+                          image: node:20
+                          resources:
+                            limits:
+                              memory: 4Gi
+                              cpu: 2000m
+                    - step:
+                        identifier: Run_Tests
+                        spec:
+                          connectorRef: org.Dockerhub
+                          image: node:20
+                          resources:
+                            limits:
+                              memory: 2Gi
+                              cpu: 1000m
+                    - step:
+                        identifier: Security_Audit
+                        spec:
+                          connectorRef: org.Dockerhub
+                          image: node:20
+                          resources:
+                            limits:
+                              memory: 1Gi
+                              cpu: 500m
+                    - step:
+                        identifier: BuildAndPushDockerRegistry_1
+                        spec:
+                          connectorRef: org.Dockerhub
+                          repo: stfgit/mower-frontend
+                          dockerfile: Dockerfile
+                          context: .
+                          tags:
+                            - <+pipeline.executionId>
+                            - latest
+                          resources:
+                            limits:
+                              memory: 4Gi
+                              cpu: 1500m
+                variables:
+                  - name: WORKING_DIRECTORY
+                    value: "."
+                  - name: NODE_VERSION
+                    value: "20"
+              delegateSelectors:
+                - helm-delegate
+      - stage:
+          identifier: scan_images
+          template:
+            templateInputs:
+              type: SecurityTests
+              spec:
+                infrastructure:
+                  type: KubernetesDirect
+                  spec:
+                    connectorRef: account.k8sdocacloud
+                    namespace: harness-ci
+                execution:
+                  steps:
+                    - step:
+                        identifier: aquatrivy_container
+                        type: AquaTrivy
+                        spec:
+                          advanced:
+                            fail_on_severity: none
+                          resources:
+                            limits:
+                              memory: 2Gi
+                              cpu: 1000m
+              delegateSelectors:
+                - helm-delegate
+      - stage:
+          identifier: deploy_dev
+          template:
+            templateInputs:
+              type: Deployment
+              spec:
+                service:
+                  serviceInputs:
+                    serviceDefinition:
+                      type: Kubernetes
+                      spec:
+                        artifacts:
+                          primary:
+                            primaryArtifactRef: frontendImage
+                            sources:
+                              - identifier: frontendImage
+                                type: DockerRegistry
+                                spec:
+                                  connectorRef: org.Dockerhub
+                                  imagePath: stfgit/mower-frontend
+                                  tag: <+pipeline.executionId>
+      - stage:
+          identifier: prod_approval
+          template:
+            templateInputs:
+              type: Approval
+              spec:
+                execution:
+                  steps:
+                    - step:
+                        identifier: approval
+                        type: HarnessApproval
+                        spec:
+                          approvers:
+                            minimumCount: 1
+                            userGroups:
+                              - org.DevSecOps_Team
+              delegateSelectors:
+                - helm-delegate
+  name: dev
+  identifier: dev
+  orgIdentifier: stf
+  projectIdentifier: MowerFrontend
