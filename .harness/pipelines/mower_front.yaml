@@ -182,7 +182,8 @@ pipeline:
                               minimumCount: <+input>.default(1)
                               userGroups:
                                 - org.DevOps_Team
-                delegateSelectors: <+input>
+                delegateSelectors:
+                  - ""
         - stage:
             identifier: deploy_prod
             template:
