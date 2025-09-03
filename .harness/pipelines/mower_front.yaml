@@ -137,7 +137,7 @@ pipeline:
                                 cpu: ""
                             image:
                               type: docker_v2
-                              name: <+input>
+                              name: stfgit/mower-frontend
                 delegateSelectors: <+input>
         - stage:
             identifier: deploy
@@ -147,9 +147,9 @@ pipeline:
                 spec:
                   environment:
                     environmentRef: development
+                    gitBranch: main
                     infrastructureDefinitions:
                       - identifier: infra_dev
-                    gitBranch: main
                   service:
                     serviceRef: mower_frontend_service
                     serviceInputs:
