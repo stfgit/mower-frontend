@@ -138,7 +138,8 @@ pipeline:
                             image:
                               type: docker_v2
                               name: stfgit/mower-frontend
-                delegateSelectors: <+input>
+                delegateSelectors:
+                  - ""
         - stage:
             identifier: deploy
             template:
